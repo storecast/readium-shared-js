@@ -183,9 +183,11 @@ ReadiumSDK.Views.AnnotationsManager = function (proxyObj, options) {
                 var fakeCfi = "epubcfi(/99!" + partialCfi + ")";
                 var annotationsForView = liveAnnotations[spine]; 
                 var annotation = annotationsForView.addHighlight(fakeCfi, id, type, styles);
-                annotation.idref = spineIdRef;
-                annotation.CFI = getPartialCfi(annotation.CFI);
-                return annotation;
+                if (annotation) {
+                    annotation.idref = spineIdRef;
+                    annotation.CFI = getPartialCfi(annotation.CFI);
+                    return annotation;
+                }
             }
         }
         return undefined;
