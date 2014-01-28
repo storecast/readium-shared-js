@@ -138,7 +138,7 @@ ReadiumSDK.Views.ScrollView = function(options){
             _currentSpineItem = spineItem;
 
             var src = _spine.package.resolveRelativeUrl(spineItem.href);
-            _iframeLoader.loadIframe(_$iframe[0], src, onIFrameLoad, self, {pageRequest:pageRequest});
+            _iframeLoader.loadIframe(_$iframe[0], src, onIFrameLoad, self, {pageRequest:pageRequest, spineItem : spineItem});
             self.trigger(ReadiumSDK.Events.CONTENT_DOCUMENT_LOAD_START, _$iframe, _currentSpineItem);
         }
     }

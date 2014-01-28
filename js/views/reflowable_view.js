@@ -157,7 +157,7 @@ ReadiumSDK.Views.ReflowableView = function(options){
 
         });
     }
-    
+
     function loadSpineItemPageRequest(pageRequest) {
         var spineItem = pageRequest.spineItem;
         if(_currentSpineItem != spineItem) {
@@ -166,7 +166,7 @@ ReadiumSDK.Views.ReflowableView = function(options){
             _currentSpineItem = spineItem;
 
             var src = _spine.package.resolveRelativeUrl(spineItem.href);
-            _iframeLoader.loadIframe(_$iframe[0], src, onIFrameLoad, self, {pageRequest:pageRequest});
+            _iframeLoader.loadIframe(_$iframe[0], src, onIFrameLoad, self, {pageRequest:pageRequest, spineItem : spineItem});
             self.trigger(ReadiumSDK.Events.CONTENT_DOCUMENT_LOAD_START, _$iframe, _currentSpineItem);
         }
     }
@@ -486,7 +486,7 @@ ReadiumSDK.Views.ReflowableView = function(options){
         else {
             _$epubHtml.css("right", (_lastViewPortSize.width + 1000) + "px");
         }
-        }
+    }
 
     this.getFirstVisibleElementCfi = function() {
 
@@ -566,7 +566,7 @@ ReadiumSDK.Views.ReflowableView = function(options){
         var visibleContentOffsets = getVisibleContentOffsets();
         return _navigationLogic.getVisibleMediaOverlayElements(visibleContentOffsets);
     };
-    
+
     this.insureElementVisibility = function(element, initiator) {
 
         var $element = $(element);

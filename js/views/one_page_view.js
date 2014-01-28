@@ -170,7 +170,7 @@ ReadiumSDK.Views.OnePageView = function(options){
             }
         }
         else { //try to get direct image size
-
+            
             // try SVG element's width/height first
             var $svg = $(contentDocument).find('svg');
             if ($svg) {
@@ -203,7 +203,7 @@ ReadiumSDK.Views.OnePageView = function(options){
 
             //hide iframe until content is scaled
             _$iframe.css("visibility", "hidden");
-            _iframeLoader.loadIframe(_$iframe[0], src, onIFrameLoad, self);
+            _iframeLoader.loadIframe(_$iframe[0], src, onIFrameLoad, self, {spineItem : spineItem});
             self.trigger(ReadiumSDK.Views.OnePageView.SPINE_ITEM_OPENING, _$iframe, _currentSpineItem);
         }
         else
@@ -271,7 +271,7 @@ ReadiumSDK.Views.OnePageView = function(options){
     this.getElementFromCfi = function(spineIdref, partialCfi){
         if(_currentSpineItem.idref === spineIdref){
             return _navigationLogic.getElementWithPartialCfi(partialCfi);
-        }
+    }
         return undefined;
     };
 
