@@ -540,9 +540,9 @@ ReadiumSDK.Views.ScrollView = function(options){
         console.warn('isElementVisible: Not implemented yet for scroll_view');
     };
 
-    this.getElementFromCfi = function(spineIdref, partialCfi){
+    this.getElementByCfi = function(spineIdref, partialCfi){
         if(_currentSpineItem.idref === spineIdref){
-            return _navigationLogic.getElementWithPartialCfi(partialCfi);
+            return _navigationLogic.getElementByCfi(partialCfi);
         }
         return undefined;
     };

@@ -535,7 +535,7 @@ ReadiumSDK.Views.FixedView = function(options){
         return true;
     }
 
-    this.getElementFromCfi = function(spineIdRef, partialCfi){
+    this.getElementByCfi = function(spineIdRef, partialCfi){
 
         var views = getDisplayingViews();
 
@@ -543,7 +543,7 @@ ReadiumSDK.Views.FixedView = function(options){
 
             var view = views[i];
             if(view.currentSpineItem().idref == spineIdRef) {
-                return view.getElementFromCfi(spineIdRef,partialCfi);
+                return view.getElementByCfi(spineIdRef,partialCfi);
             }
         }
         return undefined;

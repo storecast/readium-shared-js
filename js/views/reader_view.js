@@ -914,7 +914,7 @@ ReadiumSDK.Views.ReaderView = function(options) {
                     }
                 }
             }
-            var $elementFromCfi = _currentView.getElementFromCfi(spineIdRef,partialCfi);
+            var $elementFromCfi = _currentView.getElementByCfi(spineIdRef,partialCfi);
             if($elementFromCfi && _currentView.isElementVisible($elementFromCfi)){
                 return true;
             }
@@ -922,7 +922,7 @@ ReadiumSDK.Views.ReaderView = function(options) {
         return false;
     };
 
-    this.getElementFromCfi = function(spineIdRef,partialCfi){
-        return _currentView.getElementFromCfi(spineIdRef,partialCfi);
+    this.getElementByCfi = function(spineIdRef,partialCfi){
+        return _currentView.getElementByCfi(spineIdRef,partialCfi);
     };
 };

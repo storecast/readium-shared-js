@@ -600,9 +600,9 @@ ReadiumSDK.Views.ReflowableView = function(options){
         return false;
     };
 
-    this.getElementFromCfi = function(spineIdref, partialCfi){
+    this.getElementByCfi = function(spineIdref, partialCfi){
         if(_currentSpineItem.idref === spineIdref){
-            return _navigationLogic.getElementWithPartialCfi(partialCfi);
+            return _navigationLogic.getElementByCfi(partialCfi);
         }
         return undefined;
     };
