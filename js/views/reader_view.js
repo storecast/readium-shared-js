@@ -60,6 +60,11 @@ ReadiumSDK.Views.ReaderView = function(options) {
         _iframeLoader = new ReadiumSDK.Views.IFrameLoader();
     }
 
+    function canDoAudio() {
+        return !!document.createElement('audio').canPlayType;
+
+    }
+
     // returns true is view changed
     function initViewForItem(spineItem) {
 
@@ -110,7 +115,9 @@ ReadiumSDK.Views.ReaderView = function(options) {
 
         _currentView.on(ReadiumSDK.Events.CONTENT_DOCUMENT_LOADED, function($iframe, spineItem) {
 
-            _mediaOverlayDataInjector.attachMediaOverlayData($iframe, spineItem, _viewerSettings);
+            if (canDoAudio()) {
+                _mediaOverlayDataInjector.attachMediaOverlayData($iframe, spineItem, _viewerSettings);
+            }
             _internalLinksSupport.processLinkElements($iframe, spineItem);
             _annotationsManager.attachAnnotations($iframe, spineItem);
 
@@ -122,7 +129,9 @@ ReadiumSDK.Views.ReaderView = function(options) {
             //we call on onPageChanged explicitly instead of subscribing to the ReadiumSDK.Events.PAGINATION_CHANGED by
             //mediaOverlayPlayer because we hve to guarantee that mediaOverlayPlayer will be updated before the host
             //application will be notified by the same ReadiumSDK.Events.PAGINATION_CHANGED event
-            _mediaOverlayPlayer.onPageChanged(pageChangeData);
+            if (canDoAudio()) {
+                _mediaOverlayPlayer.onPageChanged(pageChangeData);
+            }
 
             self.trigger(ReadiumSDK.Events.PAGINATION_CHANGED, pageChangeData);
         });
@@ -194,9 +203,10 @@ ReadiumSDK.Views.ReaderView = function(options) {
             _mediaOverlayPlayer.reset();
         }
 
-        _mediaOverlayPlayer = new ReadiumSDK.Views.MediaOverlayPlayer(self, $.proxy(onMediaPlayerStatusChanged, self));
-
-        _mediaOverlayDataInjector = new ReadiumSDK.Views.MediaOverlayDataInjector(_package.media_overlay, _mediaOverlayPlayer);
+        if (canDoAudio()) {
+            _mediaOverlayPlayer = new ReadiumSDK.Views.MediaOverlayPlayer(self, $.proxy(onMediaPlayerStatusChanged, self));
+            _mediaOverlayDataInjector = new ReadiumSDK.Views.MediaOverlayDataInjector(_package.media_overlay, _mediaOverlayPlayer);
+        }
 
 
         resetCurrentView();
@@ -926,7 +936,10 @@ ReadiumSDK.Views.ReaderView = function(options) {
         return _currentView.getElementByCfi(spineIdRef,partialCfi);
     };
 
+
     this.isElementVisible = function (element) {
         return _currentView.isElementVisible($(element));
+
     }
+
 };
