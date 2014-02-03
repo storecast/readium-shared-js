@@ -576,6 +576,16 @@ ReadiumSDK.Views.ReaderView = function(options) {
 
     };
 
+    this.getElements = function(spineItem, selector) {
+
+        if(_currentView) {
+            return _currentView.getElements(spineItem, selector);
+        }
+
+        return undefined;
+
+    };
+
     function applyStyles() {
 
         ReadiumSDK.Helpers.setStyles(_userStyles.getStyles(), _$el);

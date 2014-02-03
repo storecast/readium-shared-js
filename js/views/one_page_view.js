@@ -259,6 +259,16 @@ ReadiumSDK.Views.OnePageView = function(options){
         return _navigationLogic.getElement(selector);
     };
 
+    this.getElements = function(spineItem, selector) {
+
+        if(spineItem != _currentSpineItem) {
+            console.error("spine item is not loaded");
+            return undefined;
+        }
+
+        return _navigationLogic.getElements(selector);
+    };
+
     this.getVisibleMediaOverlayElements = function() {
 
         return _navigationLogic.getVisibleMediaOverlayElements({top:0, bottom: _$iframe.height()});
