@@ -37,6 +37,7 @@ ReadiumSDK.Views.CfiNavigationLogic = function($viewport, $iframe){
         var $elements;
         var $firstVisibleTextNode = null;
         var percentOfElementHeight = 0;
+        var originalTextNode;
 
         $elements = $("body", this.getRootElement()).find(":not(iframe)").contents().filter(function () {
             return isValidTextNode(this) || this.nodeName.toLowerCase() === 'img';
@@ -49,17 +50,17 @@ ReadiumSDK.Views.CfiNavigationLogic = function($viewport, $iframe){
 
             if(this.nodeType === Node.TEXT_NODE)  { //text node
                 $element = $(this).parent();
+                originalTextNode = this;
             }
             else {
                 $element = $(this); //image
+                originalTextNode = undefined;
             }
 
             var elementRect = ReadiumSDK.Helpers.Rect.fromElement($element);
 
             if (elementRect.bottom() > topOffset) {
-
                 $firstVisibleTextNode = $element;
-
                 if(elementRect.top > topOffset) {
                     percentOfElementHeight = 0;
                 }
@@ -74,26 +75,43 @@ ReadiumSDK.Views.CfiNavigationLogic = function($viewport, $iframe){
             return true; //next element
         });
 
-        return {$element: $firstVisibleTextNode, percentY: percentOfElementHeight};
+        return {$element: $firstVisibleTextNode, percentY: percentOfElementHeight, originalTextNode: originalTextNode};
     };
 
     this.getFirstVisibleElementCfi = function(topOffset) {
-
+        var cfi;
         var foundElement = this.findFirstVisibleElement(topOffset);
+        var $element = foundElement.$element;
 
-        if(!foundElement.$element) {
+
+        // we may get a text node or an img element here. For a text node, we can generate a complete range CFI that 
+        // most specific. 
+        //
+        // For an img node we generate an offset CFI
+        if (foundElement.originalTextNode) {
+            var node = foundElement.originalTextNode;
+            var startRange, endRange;
+            // this is a bit of a hack. If the text node is long, part of it may be on the previous/next page and
+            // won't really be visible. Instead of doing what's below, we should generate selection via 
+            // http://www.w3.org/TR/cssom-view/#dom-element-getclientrects
+            startRange = Math.floor(node.length * foundElement.percentY / 100);
+            endRange = startRange + 1;
+            cfi = EPUBcfi.Generator.generateCharOffsetRangeComponent(node, startRange, node, endRange);
+        } else if ($element){
+            //noinspection JSUnresolvedVariable
+            var cfi = EPUBcfi.Generator.generateElementCFIComponent(foundElement.$element[0]);
+
+            if(cfi[0] == "!") {
+                cfi = cfi.substring(1);
+            }
+
+            cfi = cfi + "@0:" + foundElement.percentY;
+        } else {
             console.log("Could not generate CFI no visible element on page");
-            return undefined;
         }
 
-        //noinspection JSUnresolvedVariable
-        var cfi = EPUBcfi.Generator.generateElementCFIComponent(foundElement.$element[0]);
 
-        if(cfi[0] == "!") {
-            cfi = cfi.substring(1);
-        }
-
-        return cfi + "@0:" + foundElement.percentY;
+        return cfi;
     };
 
     this.getPageForElementCfi = function(cfi) {
