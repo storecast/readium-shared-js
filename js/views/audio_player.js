@@ -28,8 +28,15 @@
 
     var DEBUG = false;
 
-    var _audioElement = new Audio();
-    
+    var _audioElement;
+
+    // some browsers don't have support for WebAudio.
+    try {
+        _audioElement = new Audio();
+    } catch (Error) {
+        console.error("Could not create WebAudio object.");
+    }
+
     if (DEBUG)
     {
         _audioElement.addEventListener("load", function()
