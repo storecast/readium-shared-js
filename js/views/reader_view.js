@@ -922,7 +922,11 @@ ReadiumSDK.Views.ReaderView = function(options) {
         return false;
     };
 
-    this.getElementByCfi = function(spineIdRef,partialCfi){
+    this.getElementByCfi = function (spineIdRef,partialCfi) {
         return _currentView.getElementByCfi(spineIdRef,partialCfi);
     };
+
+    this.isElementVisible = function (element) {
+        return _currentView.isElementVisible($(element));
+    }
 };
