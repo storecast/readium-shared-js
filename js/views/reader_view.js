@@ -908,11 +908,15 @@ ReadiumSDK.Views.ReaderView = function(options) {
         return _annotationsManager.updateAnnotationView(id, styles);
     };
 
+    this.setAnnotationViewState = function(id, state, value) {
+        return _annotationsManager.setAnnotationViewState(id, state, value);
+    };
+
     this.getVisibleAnnotationMidpoints = function () {
         if (_currentView) {
             var $visibleElements = _currentView.getVisibleElementsWithFilter(_annotationsManager.getAnnotationsElementFilter());
             var elementMidpoints = _annotationsManager.getAnnotationMidpoints($visibleElements);
-            return elementMidpoints;
+            return elementMidpoints || [];
         }
         return [];
     };

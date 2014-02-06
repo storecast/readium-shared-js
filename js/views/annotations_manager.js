@@ -229,13 +229,25 @@ ReadiumSDK.Views.AnnotationsManager = function (proxyObj, options) {
         return result;
     };
 
+    this.setAnnotationViewState = function(id, state, value) {
+        var result = undefined;
+        for(var spine in liveAnnotations) {
+            var annotationsForView = liveAnnotations[spine];
+            result = annotationsForView.setAnnotationViewState(id, state, value);
+            if(result){
+                break;
+            }
+        }
+        return result;
+    };
+
     this.getAnnotationMidpoints = function($elements){
         var results = [];
         $.each($elements, function(){
             var $element = $(this.element);
             var elementId = $element[0].id;
             elementId = elementId.substring(6);
-            var $highlighted = {"id": elementId, "position":$element.position()};
+            var $highlighted = {id: elementId, position:$element.position(), lineHeight: parseInt($element.css('line-height'),10)};
             results.push($highlighted)
         });
         return results;
