@@ -361,10 +361,11 @@ ReadiumSDK.Views.CfiNavigationLogic = function($viewport, $iframe){
         if(node.nodeType === Node.TEXT_NODE) {
 
             // Heuristic to find a text node with actual text
-            var nodeText = node.nodeValue.replace(/\n/g, "");
-            nodeText = nodeText.replace(/ /g, "");
-
-             return nodeText.length > 0;
+            // If we don't do this, we may get a reference to a node that doesn't get rendered
+            // (such as for example a node that has tab character and a bunch of spaces) 
+            // this is would be bad! ask me why.
+            var nodeText = node.nodeValue.replace(/[\s\n\r\t]/g, "");
+            return nodeText.length > 0;
         }
 
         return false;
