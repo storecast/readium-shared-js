@@ -119,10 +119,11 @@ ReadiumSDK.Views.AnnotationsManager = function (proxyObj, options) {
         var args = Array.prototype.slice.call(arguments);
         // mangle annotationClicked event. What really needs to happen is, the annotation_module needs to return a 
         // bare Cfi, and this class should append the idref.
-        var mangleEvent = function(annotationClickedEvent){
-            if (args.length && args[0] === annotationClickedEvent) {
+        var mangleEvent = function(annotationEvent){
+            if (args.length && args[0] === annotationEvent) {
                 for (var spineIndex in liveAnnotations)
                 {
+                    var contentDocumentFrame = args[5];
                     var jQueryEvent = args[4];
                     var annotationId = args[3];
                     var fullFakeCfi = args[2];
@@ -130,19 +131,21 @@ ReadiumSDK.Views.AnnotationsManager = function (proxyObj, options) {
                     if (liveAnnotations[spineIndex].getHighlight(annotationId)) {
                         var idref = spines[spineIndex].idref;
                         var partialCfi = getPartialCfi(fullFakeCfi);
-                        args = [annotationClickedEvent, type, idref, partialCfi, annotationId, jQueryEvent];
+                        args = [annotationEvent, type, idref, partialCfi, annotationId, jQueryEvent, contentDocumentFrame];
                     }
                 }
             }
         }
         mangleEvent('annotationClicked');
         mangleEvent('annotationRightClicked');
+        mangleEvent('annotationHoverIn');
+        mangleEvent('annotationHoverOut');
         self['trigger'].apply(proxy, args);
     });
 
     this.attachAnnotations = function($iframe, spineItem) {
-        var epubDocument = $iframe[0].contentDocument;
-        liveAnnotations[spineItem.index] = new EpubAnnotationsModule(epubDocument, self, annotationCSSUrl);
+        var epubDocumentFrame = $iframe[0];
+        liveAnnotations[spineItem.index] = new EpubAnnotationsModule(epubDocumentFrame, self, annotationCSSUrl);
         spines[spineItem.index] = spineItem;
 
         // check to see which spine indecies can be culled depending on the distance from current spine item
