@@ -292,7 +292,7 @@
     
         this.isPlaying = function()
         {
-            return _intervalTimer != undefined;
+            return _intervalTimer !== undefined;
         };
     
         this.reset = function()
