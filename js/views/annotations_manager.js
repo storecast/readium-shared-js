@@ -262,7 +262,21 @@ ReadiumSDK.Views.AnnotationsManager = function (proxyObj, options) {
                 return;
             }
             elementId = elementId.substring(6);
-            var $highlighted = {id: elementId, position:$element.position(), lineHeight: parseInt($element.css('line-height'),10)};
+            //calculate position offsets with scaling
+            var scale = 1;
+            //figure out a better way to get the html parent from an element..
+            var $html = $('body',$element.parents()).parent();
+            //TODO: webkit specific!
+            var matrix = $html.css('-webkit-transform');
+            if(matrix){
+                scale = new WebKitCSSMatrix(matrix).a;
+            }
+            var offset = $element.offset();
+            var position = offset;
+            if(scale !== 1){
+                position = {top: (offset.top * scale)*(1/scale)-12, left: offset.left }; //the 12 is a "padding"
+            }
+            var $highlighted = {id: elementId, position: position, lineHeight: parseInt($element.css('line-height'),10)};
             results.push($highlighted)
         });
         return results;
