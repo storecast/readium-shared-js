@@ -268,7 +268,7 @@ ReadiumSDK.Views.OnePageView = function(options){
 
         return _navigationLogic.getElements(selector);
     };
-
+    //TODO JC: investigate potential incorrect visibility check with these two functions
     this.getVisibleMediaOverlayElements = function() {
 
         return _navigationLogic.getVisibleMediaOverlayElements({top:0, bottom: _$iframe.height()});
@@ -276,6 +276,10 @@ ReadiumSDK.Views.OnePageView = function(options){
 
     this.getVisibleElementsWithFilter = function(filterFunction) {
         return _navigationLogic.getVisibleElementsWithFilter({top:0, bottom: _$iframe.height()},filterFunction);
+    };
+
+    this.getAllElementsWithFilter = function(filterFunction) {
+        return _navigationLogic.getAllElementsWithFilter(filterFunction);
     };
 
     this.getElementByCfi = function(spineIdref, partialCfi){

@@ -248,6 +248,11 @@ ReadiumSDK.Views.CfiNavigationLogic = function($viewport, $iframe){
         return this.getVisibleElements($elements, visibleContentOffsets);
     };
 
+    this.getAllElementsWithFilter = function (filterFunction) {
+        var $elements = this.getElementsWithFilter($("body", this.getRootElement()),filterFunction);
+        return $elements;
+    };
+
     this.isElementVisible = function($element, visibleContentOffsets) {
 
         var elementRect = ReadiumSDK.Helpers.Rect.fromElement($element);

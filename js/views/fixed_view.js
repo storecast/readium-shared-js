@@ -539,7 +539,8 @@ ReadiumSDK.Views.FixedView = function(options){
         var views = getDisplayingViews();
 
         for(var i = 0, count = views.length; i < count; i++) {
-            elements.push.apply(elements, views[i].getVisibleElementsWithFilter(filterFunction));
+            //for now we assume that for fixed layouts elements are always visible
+            elements.push.apply(elements, views[i].getAllElementsWithFilter(filterFunction));
         }
 
         return elements;

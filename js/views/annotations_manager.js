@@ -246,9 +246,21 @@ ReadiumSDK.Views.AnnotationsManager = function (proxyObj, options) {
 
     this.getAnnotationMidpoints = function($elements){
         var results = [];
-        $.each($elements, function(){
-            var $element = $(this.element);
-            var elementId = $element[0].id;
+        _.each($elements, function(element){
+            var $element;
+            //TODO JC: yuck, we get two different collection structures from non fixed and fixed views.. must refactor..
+            if(element.element){
+                $element = $(element.element);
+                element = element.element;
+            }else{
+                $element = $(element);
+                element = element[0];
+            }
+            var elementId = $element.attr('id');
+            if(!elementId){
+                console.warn('AnnotationsManager:getAnnotationMidpoints: Got an annotation element with no ID??')
+                return;
+            }
             elementId = elementId.substring(6);
             var $highlighted = {id: elementId, position:$element.position(), lineHeight: parseInt($element.css('line-height'),10)};
             results.push($highlighted)
