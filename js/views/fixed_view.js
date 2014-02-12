@@ -208,7 +208,7 @@ ReadiumSDK.Views.FixedView = function(options){
 
     function resizeBook() {
 
-        if(!isContentRendered()) {
+        if (!isContentRendered()) {
             return;
         }
 
@@ -222,12 +222,12 @@ ReadiumSDK.Views.FixedView = function(options){
         var pageMargins = getMaxPageMargins(leftPageMargins, rightPageMargins, centerPageMargins);
 
         var potentialTargetElementSize = {   width: viewportWidth - _bookMargins.width(),
-                                             height: viewportHeight - _bookMargins.height()};
+            height: viewportHeight - _bookMargins.height()};
 
         var potentialContentSize = {    width: potentialTargetElementSize.width - pageMargins.width(),
-                                        height: potentialTargetElementSize.height - pageMargins.height() };
+            height: potentialTargetElementSize.height - pageMargins.height() };
 
-        if(potentialTargetElementSize.width <= 0 || potentialTargetElementSize.height <= 0) {
+        if (potentialTargetElementSize.width <= 0 || potentialTargetElementSize.height <= 0) {
             return;
         }
 
@@ -237,50 +237,50 @@ ReadiumSDK.Views.FixedView = function(options){
         var scale = Math.min(horScale, verScale);
 
         var contentSize = { width: _contentMetaSize.width * scale,
-                            height: _contentMetaSize.height * scale };
+            height: _contentMetaSize.height * scale };
 
         var targetElementSize = {   width: contentSize.width + pageMargins.width(),
-                                    height: contentSize.height + pageMargins.height() };
+            height: contentSize.height + pageMargins.height() };
 
         var bookSize = {    width: targetElementSize.width + _bookMargins.width(),
-                            height: targetElementSize.height + _bookMargins.height() };
+            height: targetElementSize.height + _bookMargins.height() };
 
 
         var bookLeft = Math.floor((viewportWidth - bookSize.width) / 2);
         var bookTop = Math.floor((viewportHeight - bookSize.height) / 2);
 
-        if(bookLeft < 0) bookLeft = 0;
-        if(bookTop < 0) bookTop = 0;
+        if (bookLeft < 0) bookLeft = 0;
+        if (bookTop < 0) bookTop = 0;
 
         _$el.css("left", bookLeft + "px");
         _$el.css("top", bookTop + "px");
-        _$el.css("width", targetElementSize.width + "px");
-        _$el.css("height", targetElementSize.height + "px");
+        _$el.css("width", Math.floor(targetElementSize.width) + "px");
+        _$el.css("height", Math.floor(targetElementSize.height) + "px");
 
         var left = _bookMargins.padding.left;
         var top = _bookMargins.padding.top;
 
-        if(_leftPageView.isDisplaying()) {
+        if (_leftPageView.isDisplaying()) {
 
-             _leftPageView.transformContent(scale, left, top);
+            _leftPageView.transformContent(scale, left, top);
         }
 
-        if(_rightPageView.isDisplaying()) {
+        if (_rightPageView.isDisplaying()) {
 
-            left += _contentMetaSize.separatorPosition * scale;
+            left += Math.floor(_contentMetaSize.separatorPosition * scale);
 
-            if(_leftPageView.isDisplaying()) {
+            if (_leftPageView.isDisplaying()) {
                 left += leftPageMargins.left;
             }
 
             _rightPageView.transformContent(scale, left, top);
         }
 
-        if(_centerPageView.isDisplaying()) {
+        if (_centerPageView.isDisplaying()) {
 
             _centerPageView.transformContent(scale, left, top);
         }
-        }
+    }
 
     function getMaxPageMargins(leftPageMargins, rightPageMargins, centerPageMargins) {
 
