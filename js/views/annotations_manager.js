@@ -244,42 +244,51 @@ ReadiumSDK.Views.AnnotationsManager = function (proxyObj, options) {
         return result;
     };
 
-    this.getAnnotationMidpoints = function($elements){
-        var results = [];
-        _.each($elements, function(element){
-            var $element;
-            //TODO JC: yuck, we get two different collection structures from non fixed and fixed views.. must refactor..
-            if(element.element){
-                $element = $(element.element);
-                element = element.element;
-            }else{
-                $element = $(element);
-                element = element[0];
-            }
-            var elementId = $element.attr('id');
-            if(!elementId){
-                console.warn('AnnotationsManager:getAnnotationMidpoints: Got an annotation element with no ID??')
-                return;
-            }
-            elementId = elementId.substring(6);
-            //calculate position offsets with scaling
-            var scale = 1;
-            //figure out a better way to get the html parent from an element..
-            var $html = $('body',$element.parents()).parent();
-            //TODO: webkit specific!
-            var matrix = $html.css('-webkit-transform');
-            if(matrix){
-                scale = new WebKitCSSMatrix(matrix).a;
-            }
-            var offset = $element.offset();
-            var position = offset;
-            if(scale !== 1){
-                position = {top: (offset.top * scale)*(1/scale)-12, left: offset.left }; //the 12 is a "padding"
-            }
-            var $highlighted = {id: elementId, position: position, lineHeight: parseInt($element.css('line-height'),10)};
-            results.push($highlighted)
+    this.getAnnotationMidpoints = function($elementSpineItemCollection){
+        var output = [];
+
+        _.each($elementSpineItemCollection, function (item){
+            var annotations = [];
+
+            _.each(item.elements, function(element){
+
+                var $element;
+                //TODO JC: yuck, we get two different collection structures from non fixed and fixed views.. must refactor..
+                if(element.element){
+                    $element = $(element.element);
+                    element = element.element;
+                }else{
+                    $element = $(element);
+                    element = element[0];
+                }
+                var elementId = $element.attr('id');
+                if(!elementId){
+                    console.warn('AnnotationsManager:getAnnotationMidpoints: Got an annotation element with no ID??')
+                    return;
+                }
+                elementId = elementId.substring(6);
+                //calculate position offsets with scaling
+                var scale = 1;
+                //figure out a better way to get the html parent from an element..
+                var $html = $('body',$element.parents()).parent();
+                //TODO: webkit specific!
+                var matrix = $html.css('-webkit-transform');
+                if(matrix){
+                    scale = new WebKitCSSMatrix(matrix).a;
+                }
+                var offset = $element.offset();
+                var position = offset;
+                if(scale !== 1){
+                    position = {top: (offset.top * scale)*(1/scale)-12, left: offset.left }; //the 12 is a "padding"
+                }
+                var $highlighted = {id: elementId, position: position, lineHeight: parseInt($element.css('line-height'),10)};
+                annotations.push($highlighted)
+            });
+
+            output.push({annotations:annotations, spineItem: item.spineItem});
         });
-        return results;
+
+        return output;
     };
 
     this.getAnnotationsElementFilter = function(){
