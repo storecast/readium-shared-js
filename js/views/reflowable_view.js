@@ -602,10 +602,18 @@ ReadiumSDK.Views.ReflowableView = function(options){
         self.openPage(openPageRequest);
     }
 
-    this.getVisibleElementsWithFilter = function(filterFunction) {
+    this.getVisibleElementsWithFilter = function(filterFunction, includeSpineItem) {
 
         var visibleContentOffsets = getVisibleContentOffsets();
-        return _navigationLogic.getVisibleElementsWithFilter(visibleContentOffsets,filterFunction);
+
+        var elements = _navigationLogic.getVisibleElementsWithFilter(visibleContentOffsets,filterFunction);
+
+        if (includeSpineItem) {
+            return {elements: elements, spineItem:_currentSpineItem};
+        } else {
+            return elements;
+        }
+
     };
 
     this.isElementVisible = function($element){

@@ -274,12 +274,27 @@ ReadiumSDK.Views.OnePageView = function(options){
         return _navigationLogic.getVisibleMediaOverlayElements({top:0, bottom: _$iframe.height()});
     };
 
-    this.getVisibleElementsWithFilter = function(filterFunction) {
-        return _navigationLogic.getVisibleElementsWithFilter({top:0, bottom: _$iframe.height()},filterFunction);
+    this.getVisibleElementsWithFilter = function(filterFunction, includeSpineItem) {
+
+        var visibleContentOffsets = {top:0, bottom: _$iframe.height()};
+        var elements = _navigationLogic.getVisibleElementsWithFilter(visibleContentOffsets,filterFunction);
+
+        if (includeSpineItem) {
+            return {elements: elements, spineItem:_currentSpineItem};
+        } else {
+            return elements;
+        }
+
     };
 
-    this.getAllElementsWithFilter = function(filterFunction) {
-        return _navigationLogic.getAllElementsWithFilter(filterFunction);
+    this.getAllElementsWithFilter = function(filterFunction, includeSpineItem) {
+        var elements = _navigationLogic.getAllElementsWithFilter(filterFunction);
+
+        if (includeSpineItem) {
+            return {elements: elements, spineItem:_currentSpineItem};
+        } else {
+            return elements;
+        }
     };
 
     this.getElementByCfi = function(spineIdref, partialCfi){

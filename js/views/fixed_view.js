@@ -532,7 +532,7 @@ ReadiumSDK.Views.FixedView = function(options){
 
     }
 
-    this.getVisibleElementsWithFilter = function(filterFunction) {
+    this.getVisibleElementsWithFilter = function(filterFunction, includeSpineItems) {
 
         var elements = [];
 
@@ -540,7 +540,7 @@ ReadiumSDK.Views.FixedView = function(options){
 
         for(var i = 0, count = views.length; i < count; i++) {
             //for now we assume that for fixed layouts elements are always visible
-            elements.push.apply(elements, views[i].getAllElementsWithFilter(filterFunction));
+            elements.push(views[i].getAllElementsWithFilter(filterFunction, includeSpineItems));
         }
 
         return elements;
