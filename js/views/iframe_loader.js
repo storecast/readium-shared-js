@@ -19,10 +19,28 @@
 
 ReadiumSDK.Views.IFrameLoader = function() {
 
-    this.loadIframe = function(iframe, src, callback, context, attachedData) {
+    var eventListeners = {};
+
+    this.addIFrameEventListener = function(eventName, callback, context) {
+
+        if(eventListeners[eventName] == undefined) {
+            eventListeners[eventName] = [];
+        }
+
+        eventListeners[eventName].push({callback: callback, context: context});
+    };
+
+    this.loadIframe = function(iframe, src, callback, context) {
 
         $(iframe).hide();
+
         iframe.onload = function() {
+
+            _.each(eventListeners, function(value, key){
+                for(var i = 0, count = value.length; i< count; i++) {
+                    $(iframe.contentWindow).on(key, value[i].callback, value[i].context);
+                }
+            });
 
             try
             {
@@ -37,7 +55,7 @@ ReadiumSDK.Views.IFrameLoader = function() {
             {
                 console.log("epubReadingSystem INJECTION ERROR! " + ex.message);
             }
-            callback.call(context, true, attachedData);
+            callback.call(context, true);
             $(iframe).show();
         };
 
