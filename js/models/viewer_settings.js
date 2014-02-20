@@ -30,6 +30,7 @@ ReadiumSDK.Models.ViewerSettings = function(settingsData) {
     this.mediaOverlaysEnableClick = true;
     this.mediaOverlaysRate = 1;
     this.mediaOverlaysVolume = 100;
+    this.turnPagesAuthomaticaly = true;
     this.isScrollViewDoc = false;
     this.isScrollViewContinuous = false;
 
@@ -76,6 +77,7 @@ ReadiumSDK.Models.ViewerSettings = function(settingsData) {
         mapProperty("mediaOverlaysVolume", settingsData);
         mapProperty("isScrollViewDoc", settingsData);
         mapProperty("isScrollViewContinuous", settingsData);
+        mapProperty("turnPagesAuthomaticaly", settingsData);
     };
 
     this.update(settingsData);
