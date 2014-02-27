@@ -268,7 +268,7 @@ ReadiumSDK.Views.ScrollView = function(options){
         }
         else if(pageRequest.elementId) {
 
-            $element = _navigationLogic.getElementBuyId(pageRequest.elementId);
+            $element = _navigationLogic.getElementById(pageRequest.elementId);
 
             if(!$element) {
                 console.warn("Element id=" + pageRequest.elementId + " not found!");
@@ -524,9 +524,9 @@ ReadiumSDK.Views.ScrollView = function(options){
         return _navigationLogic.getElement(selector);
     };
 
-    this.getVisibleMediaOverlayElements = function() {
+    this.getFirstVisibleMediaOverlayElement = function() {
 
-        return _navigationLogic.getVisibleMediaOverlayElements(visibleOffsets());
+        return _navigationLogic.getFirstVisibleMediaOverlayElement(visibleOffsets());
     };
 
     function visibleOffsets() {
@@ -543,7 +543,7 @@ ReadiumSDK.Views.ScrollView = function(options){
         var $element = $(element);
 
 
-        if(_navigationLogic.isElementVisible($element, visibleOffsets())) {
+        if(_navigationLogic.getElementVisibility($element, visibleOffsets()) > 0) {
             return;
         }
 

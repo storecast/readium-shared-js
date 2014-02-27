@@ -515,15 +515,22 @@ ReadiumSDK.Views.ReaderView = function(options) {
      *
      * @param styles {object} style object contains selector property and declarations object
      */
-    this.setStyles = function(styles) {
+    this.setStyles = function(styles, doNotUpdateView) {
 
         var count = styles.length;
 
         for(var i = 0; i < count; i++) {
-            _userStyles.addStyle(styles[i].selector, styles[i].declarations);
+            if (styles[i].declarations)
+            {
+                _userStyles.addStyle(styles[i].selector, styles[i].declarations);
+            }
+            else
+            {
+                _userStyles.removeStyle(styles[i].selector);
+            }
         }
 
-        applyStyles();
+        applyStyles(doNotUpdateView);
 
     };
 
@@ -558,15 +565,27 @@ ReadiumSDK.Views.ReaderView = function(options) {
 
     };
 
-    function applyStyles() {
+    this.getElementByCfi = function(spineItem, cfi, classBlacklist, elementBlacklist, idBlacklist) {
+
+        if(_currentView) {
+            return _currentView.getElementByCfi(spineItem, cfi, classBlacklist, elementBlacklist, idBlacklist);
+        }
+
+        return undefined;
+
+    };
+
+    function applyStyles(doNotUpdateView) {
 
         ReadiumSDK.Helpers.setStyles(_userStyles.getStyles(), _$el);
+
+        _mediaOverlayPlayer.applyStyles();
+
+        if(doNotUpdateView) return;
 
         if(_currentView) {
             _currentView.applyStyles();
         }
-
-        _mediaOverlayPlayer.applyStyles();
     }
 
     //TODO: this is public function - should be JS Doc-ed
@@ -787,13 +806,13 @@ ReadiumSDK.Views.ReaderView = function(options) {
 //    };
 
 
-    this.getVisibleMediaOverlayElements = function() {
+    this.getFirstVisibleMediaOverlayElement = function() {
 
         if(_currentView) {
-            return _currentView.getVisibleMediaOverlayElements();
+            return _currentView.getFirstVisibleMediaOverlayElement();
         }
 
-        return [];
+        return undefined;
     };
 
     this.insureElementVisibility = function(element, initiator) {
