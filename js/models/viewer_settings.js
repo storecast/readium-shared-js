@@ -32,7 +32,7 @@ ReadiumSDK.Models.ViewerSettings = function(settingsData) {
     this.mediaOverlaysVolume = 100;
     this.automaticPageTurnEnabled = true;
     
-    this.mediaOverlaysSynchronizationGranularity = undefined;
+    this.mediaOverlaysSynchronizationGranularity = "";
     
     this.isScrollViewDoc = false;
     this.isScrollViewContinuous = false;
