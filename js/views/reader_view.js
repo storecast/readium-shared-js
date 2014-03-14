@@ -110,6 +110,10 @@ ReadiumSDK.Views.ReaderView = function(options) {
             _internalLinksSupport.processLinkElements($iframe, spineItem);
             _annotationsManager.attachAnnotations($iframe, spineItem);
 
+            var contentDoc = $iframe[0].contentDocument;
+            ReadiumSDK.Models.Trigger.register(contentDoc);
+            ReadiumSDK.Models.Switches.apply(contentDoc);
+
             self.trigger(ReadiumSDK.Events.CONTENT_DOCUMENT_LOADED, $iframe, spineItem);
         });
 
@@ -206,9 +210,21 @@ ReadiumSDK.Views.ReaderView = function(options) {
             self.setStyles(openBookData.styles);
         }
 
+        var pageRequestData = undefined;
+
         if(openBookData.openPageRequest) {
 
-            var pageRequestData = openBookData.openPageRequest;
+            if(openBookData.openPageRequest.idref || (openBookData.openPageRequest.contentRefUrl && openBookData.openPageRequest.sourceFileHref)) {
+                pageRequestData = openBookData.openPageRequest;
+            }
+            else {
+                console.log("Invalid page request data: idref required!");
+            }
+        }
+
+        if(pageRequestData) {
+
+            pageRequestData = openBookData.openPageRequest;
 
             if(pageRequestData.idref) {
 
@@ -222,12 +238,10 @@ ReadiumSDK.Views.ReaderView = function(options) {
                     self.openSpineItemPage(pageRequestData.idref, 0, self);
                 }
             }
-            else if(pageRequestData.contentRefUrl && pageRequestData.sourceFileHref) {
+            else {
                 self.openContentUrl(pageRequestData.contentRefUrl, pageRequestData.sourceFileHref, self);
             }
-            else {
-                console.log("Invalid page request data: idref required!");
-            }
+
         }
         else {// if we where not asked to open specific page we will open the first one
 
