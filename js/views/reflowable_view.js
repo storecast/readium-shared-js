@@ -454,7 +454,7 @@ ReadiumSDK.Views.ReflowableView = function(options){
                 _$epubHtml.hide();
                 setTimeout(function() {
                     _$epubHtml.show();
-                    onPaginationChanged(self);
+                    onPaginationChanged(self); // => redraw() => showBook()
                 }, 50);
 
             }
@@ -463,15 +463,15 @@ ReadiumSDK.Views.ReflowableView = function(options){
 
     }
 
-    function shiftBookOfScreen() {
-
-        if(_spine.isLeftToRight()) {
-            _$epubHtml.css("left", (_lastViewPortSize.width + 1000) + "px");
-        }
-        else {
-            _$epubHtml.css("right", (_lastViewPortSize.width + 1000) + "px");
-        }
-    }
+//    function shiftBookOfScreen() {
+//
+//        if(_spine.isLeftToRight()) {
+//            _$epubHtml.css("left", (_lastViewPortSize.width + 1000) + "px");
+//        }
+//        else {
+//            _$epubHtml.css("right", (_lastViewPortSize.width + 1000) + "px");
+//        }
+//    }
 
     function hideBook() {
 
