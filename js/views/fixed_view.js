@@ -76,7 +76,11 @@ ReadiumSDK.Views.FixedView = function(options){
         var template = ReadiumSDK.Helpers.loadTemplate("fixed_book_frame", {});
 
         _$el = $(template);
-        _$el.css("-webkit-transition", "all 0 ease 0");
+        
+        _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
+            _$el.css(prefix + "transition", "all 0 ease 0");
+        });
+        
         _$el.css("overflow", "hidden");
         
         _$viewport.append(_$el);
@@ -539,6 +543,22 @@ ReadiumSDK.Views.FixedView = function(options){
         return undefined;
     };
 
+    this.getElementById = function(spineItem, id) {
+
+        var views = getDisplayingViews();
+
+        for(var i = 0, count = views.length; i < count; i++) {
+
+            var view = views[i];
+            if(view.currentSpineItem() == spineItem) {
+                return view.getElementById(spineItem, id);
+            }
+        }
+
+        console.error("spine item is not loaded");
+        return undefined;
+    };
+    
     this.getElementByCfi = function(spineItem, cfi, classBlacklist, elementBlacklist, idBlacklist) {
 
         var views = getDisplayingViews();

@@ -110,6 +110,7 @@ ReadiumSDK.Views.ReaderView = function(options) {
 
         _currentView.on(ReadiumSDK.Events.CONTENT_DOCUMENT_LOADED, function($iframe, spineItem) {
 
+            // performance degrades with large DOM (e.g. word-level text-audio sync)
             _mediaOverlayDataInjector.attachMediaOverlayData($iframe, spineItem, _viewerSettings);
             
             _internalLinksSupport.processLinkElements($iframe, spineItem);
@@ -587,7 +588,15 @@ ReadiumSDK.Views.ReaderView = function(options) {
         }
 
         return undefined;
+    };
 
+    this.getElementById = function(spineItem, id) {
+
+        if(_currentView) {
+            return _currentView.getElementById(spineItem, id);
+        }
+
+        return undefined;
     };
 
     this.getElementByCfi = function(spineItem, cfi, classBlacklist, elementBlacklist, idBlacklist) {
@@ -848,7 +857,26 @@ ReadiumSDK.Views.ReaderView = function(options) {
 
     this.handleViewportResize = function(){
         if (_currentView){
+            
+            var wasPlaying = false;
+            if (_currentView.isReflowable && _currentView.isReflowable())
+            {
+                wasPlaying = this.isPlayingMediaOverlay();
+                if (wasPlaying)
+                {
+                    this.pauseMediaOverlay();
+                }
+            }
+            
             _currentView.onViewportResize();
+
+            if (wasPlaying)
+            {
+                setTimeout(function()
+                {
+                    self.playMediaOverlay();
+                }, 150);
+            }
         }
     }
 

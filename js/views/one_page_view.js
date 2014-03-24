@@ -82,9 +82,11 @@ ReadiumSDK.Views.OnePageView = function(options){
             var template = ReadiumSDK.Helpers.loadTemplate("fixed_page_frame", {});
 
             _$el = $(template);
-
-            _$el.css("-webkit-transition", "all 0 ease 0");
-            
+        
+            _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
+                _$el.css(prefix + "transition", "all 0 ease 0");
+            });
+        
             _$el.css("height", "100%");
             _$el.css("width", "100%");
 
@@ -143,8 +145,11 @@ ReadiumSDK.Views.OnePageView = function(options){
 
         var elWidth = Math.ceil(_meta_size.width * scale);
         var elHeight = Math.floor(_meta_size.height * scale);
-
-        _$el.css("-webkit-transition", "all 0 ease 0");
+    
+        _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
+            _$el.css(prefix + "transition", "all 0 ease 0");
+        });
+    
         if (pageSwitchActuallyChanged && _enablePageTransitions)
         {
             if (_pageSwitchDir === 0)
@@ -155,7 +160,7 @@ ReadiumSDK.Views.OnePageView = function(options){
             {
                 if (pageTransition_Translate)
                 {
-                    var initialLeft = elWidth * 0.3 * (_pageSwitchDir === 2 ? 1 : -1);
+                    var initialLeft = elWidth * 0.7 * (_pageSwitchDir === 2 ? 1 : -1);
                     var move = generateTransformCSS(1, Math.round(initialLeft), 0);
                     _$el.css(move);
                 }
@@ -203,7 +208,10 @@ ReadiumSDK.Views.OnePageView = function(options){
             {
                 if (_pageSwitchDir === 0)
                 {
-                    _$el.css("-webkit-transition", "opacity 250ms linear");
+                    _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
+                        _$el.css(prefix + "transition", "opacity 250ms linear");
+                    });
+        
                     _$el.css("opacity", "1");
                 }
                 else
@@ -211,11 +219,19 @@ ReadiumSDK.Views.OnePageView = function(options){
                     if (pageTransition_Translate)
                     {
                         _$el.css("-webkit-transition", "-webkit-transform 200ms ease-out");
-                        _$el.css("-webkit-transform", "none");
+                        var css = {};
+                        _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
+                            //css[prefix + 'transition'] = prefix + "transform 200ms ease-out";
+                            css[prefix + 'transform'] = "none";
+                        });
+                        _$el.css(css);
                     }
                     else
                     {
-                        _$el.css("-webkit-transition", "opacity 150ms ease-out");
+                        _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
+                            _$el.css(prefix + "transition", "opacity 150ms ease-out");
+                        });
+
                         _$el.css("opacity", "1");
                     }
                 }
@@ -241,8 +257,10 @@ ReadiumSDK.Views.OnePageView = function(options){
 
         //TODO modernizer library can be used to get browser independent transform attributes names (implemented in readium-web fixed_layout_book_zoomer.js)
         var css = {};
-        css["-webkit-transform"] = transformString;
-        css["-webkit-transform-origin"] = "0 0";
+        _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
+            css[prefix + 'transform'] = transformString;
+            css[prefix + 'transform-origin'] = '0 0';
+        });
 
         return css;
     }
@@ -358,6 +376,17 @@ ReadiumSDK.Views.OnePageView = function(options){
 
         var navigation = new ReadiumSDK.Views.CfiNavigationLogic(_$el, _$iframe);
         return navigation.getElementByCfi(cfi, classBlacklist, elementBlacklist, idBlacklist);
+    };
+
+    this.getElementById = function(spineItem, id) {
+
+        if(spineItem != _currentSpineItem) {
+            console.error("spine item is not loaded");
+            return undefined;
+        }
+
+        var navigation = new ReadiumSDK.Views.CfiNavigationLogic(_$el, _$iframe);
+        return navigation.getElementById(id);
     };
 
     this.getElement = function(spineItem, selector) {

@@ -183,9 +183,10 @@ ReadiumSDK.Views.ReflowableView = function(options){
     function updateColumnGap() {
 
         if(_$epubHtml) {
-            _$epubHtml.css("-webkit-column-gap", _paginationInfo.columnGap + "px");
-            _$epubHtml.css("-moz-column-gap", _paginationInfo.columnGap + "px");
-            _$epubHtml.css("column-gap", _paginationInfo.columnGap + "px");
+        
+            _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
+                _$epubHtml.css(prefix + "column-gap", _paginationInfo.columnGap + "px");
+            });
         }
     }
 
@@ -215,7 +216,10 @@ ReadiumSDK.Views.ReflowableView = function(options){
 
         _$epubHtml.css("height", _lastViewPortSize.height + "px");
         _$epubHtml.css("position", "relative");
-        _$epubHtml.css("-webkit-column-axis", "horizontal");
+
+        _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
+            _$epubHtml.css(prefix + "column-axis", "horizontal");
+        });
 
         self.applyBookStyles();
         resizeImages();
@@ -226,10 +230,13 @@ ReadiumSDK.Views.ReflowableView = function(options){
 
 /////////
 //Columns Debugging
-//                    $epubHtml.css("-webkit-column-rule-color", "red");
-//                    $epubHtml.css("-webkit-column-rule-style", "dashed");
-//                    $epubHtml.css("background-color", '#b0c4de');
-/////////
+// 
+// _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
+//     _$epubHtml.css(prefix + "column-rule-color", "red");
+//     _$epubHtml.css(prefix + "column-rule-style", "dashed");
+// });
+// $epubHtml.css("background-color", '#b0c4de');
+
 
         self.applyStyles();
     }
@@ -316,7 +323,6 @@ ReadiumSDK.Views.ReflowableView = function(options){
         }
 
         if(pageIndex >= 0 && pageIndex < _paginationInfo.columnCount) {
-
             _paginationInfo.currentSpreadIndex = Math.floor(pageIndex / _paginationInfo.visibleColumnCount) ;
             onPaginationChanged(pageRequest.initiator, pageRequest.spineItem, pageRequest.elementId);
         }
@@ -424,9 +430,10 @@ ReadiumSDK.Views.ReflowableView = function(options){
         // _$epubHtml.css("width", _paginationInfo.columnWidth);
         _$epubHtml.css("width", _lastViewPortSize.width);
 
-        _$epubHtml.css("-webkit-column-width", _paginationInfo.columnWidth + "px");
-        _$epubHtml.css("-moz-column-width", _paginationInfo.columnWidth + "px");
-        _$epubHtml.css("column-width", _paginationInfo.columnWidth + "px");
+        _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
+            _$epubHtml.css(prefix + "column-width", _paginationInfo.columnWidth + "px");
+        });
+
 
         var doc = _$iframe[0].contentDocument;
 	    var el = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
@@ -602,6 +609,16 @@ ReadiumSDK.Views.ReflowableView = function(options){
         return _navigationLogic.getElementByCfi(cfi, classBlacklist, elementBlacklist, idBlacklist);
     };
 
+    this.getElementById = function(spineItem, id) {
+
+        if(spineItem != _currentSpineItem) {
+            console.error("spine item is not loaded");
+            return undefined;
+        }
+
+        return _navigationLogic.getElementById(id);
+    };
+
     this.getElement = function(spineItem, selector) {
 
         if(spineItem != _currentSpineItem) {
@@ -624,16 +641,18 @@ ReadiumSDK.Views.ReflowableView = function(options){
         return _navigationLogic.getVisibleMediaOverlayElements(visibleContentOffsets);
     };
 
-    this.insureElementVisibility = function(element, initiator) {
-
+    this.insureElementVisibility = function(element, initiator)
+    {
         var $element = $(element);
-        if(_navigationLogic.isElementVisible($element, getVisibleContentOffsets())) {
+        if(_navigationLogic.isElementVisible($element, getVisibleContentOffsets()))
+        {
             return;
         }
 
         var page = _navigationLogic.getPageForElement($element);
 
-        if(page == -1) {
+        if(page == -1)
+        {
             return;
         }
 
@@ -645,6 +664,7 @@ ReadiumSDK.Views.ReflowableView = function(options){
         {
             id = element.getAttribute("id");
         }
+        
         if (id)
         {
             openPageRequest.setElementId(id);
