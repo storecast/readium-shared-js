@@ -711,9 +711,7 @@ ReadiumSDK.Views.ReaderView = function(options) {
         //interrup at this point
         if (_viewerSettings.isSyntheticSpread == false || spineItem.isLeftPage() || spineItem.isCenterPage()) {
             if (_viewerSettings.automaticPageTurnEnabled == false) {
-                setTimeout(function() {
-                                self.trigger(ReadiumSDK.Events.PAGINATION_WILL_CHANGE);
-                           }, 20);
+                self.trigger(ReadiumSDK.Events.PAGINATION_WILL_CHANGE);
                 return;
             }
         }
