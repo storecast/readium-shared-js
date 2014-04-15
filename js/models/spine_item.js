@@ -115,7 +115,7 @@ ReadiumSDK.Models.SpineItem = function(itemData, index, spine){
         }
 
         // if image or svg use fixed layout
-        return self.media_type.indexOf("image/") >= 0;
+        return self.media_type && self.media_type.indexOf("image/") == 0;
 
     };
 
