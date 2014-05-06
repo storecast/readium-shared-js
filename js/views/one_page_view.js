@@ -596,7 +596,7 @@ ReadiumSDK.Views.OnePageView = function(options, classes, enableBookStyleOverrid
 
     this.getFirstVisibleMediaOverlayElement = function() {
         var navigation = new ReadiumSDK.Views.CfiNavigationLogic(_$el, _$iframe);
-        return navigation.getFirstVisibleMediaOverlayElement({top:0, bottom: _$iframe.height()});
+        return navigation.getFirstVisibleMediaOverlayElement({top:0/*, bottom: _$iframe.height()*/});
     };
 
     this.offset = function()
