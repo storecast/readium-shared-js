@@ -646,8 +646,12 @@ ReadiumSDK.Views.CfiNavigationLogic = function($viewport, $iframe, options){
 
                 var $item = $(item);
 
-                if($item.data("mediaOverlayData"))
+                var data = $item.data("mediaOverlayData");
+
+                if(data)
                 {
+                    if (data.isFake) continue;
+
                     var visible = that.getElementVisibility($item, visibleContentOffsets);
                     if (visible)
                     {
