@@ -488,6 +488,7 @@ console.debug("MO readaloud attr: " + readaloud);
                                     console.error("DIFFERENT PARS??!");
                                 }
                             }
+
                             var isFake = smil.href == "fake.smil";
                             $element.data("mediaOverlayData", {par: iter.currentPar, "isFake" : isFake});
 
