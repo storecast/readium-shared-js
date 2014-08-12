@@ -330,8 +330,16 @@ ReadiumSDK.Views.OnePageView = function(options, classes, enableBookStyleOverrid
             _$el.css("height", "100%");
             _$el.css("width", "100%");
 
-            // This fixes rendering issues with WebView (native apps), which clips content embedded in iframes unless GPU hardware acceleration is enabled for CSS rendering.
-            _$el.css("transform", "translateZ(0)");
+            var settings = _viewSettings;
+            if (!settings)
+            {
+                //defaults
+                settings = new ReadiumSDK.Models.ViewerSettings({});
+            }
+            if (settings.enableGPUHardwareAccelerationCSS3D) {
+                // This fixes rendering issues with WebView (native apps), which clips content embedded in iframes unless GPU hardware acceleration is enabled for CSS rendering.
+                _$el.css("transform", "translateZ(0)");
+            }
 
             for(var i = 0, count = classes.length; i < count; i++) {
                 _$el.addClass(classes[i]);
@@ -628,7 +636,7 @@ ReadiumSDK.Views.OnePageView = function(options, classes, enableBookStyleOverrid
         }
         
         if (!size) {
-            // Image fallback ... a bit of a hack, but it works with some eBooks :(
+            // Image fallback (auto-generated HTML template when WebView / iFrame is fed with image media type)
             var $img = $(contentDocument).find('img');
             if($img.length > 0) {
                 size = {
@@ -640,7 +648,10 @@ ReadiumSDK.Views.OnePageView = function(options, classes, enableBookStyleOverrid
                 //     contentDocument.documentElement.setAttribute("height", size.height);
                 // }
 
-                console.warn("Viewport: using img dimensions!");
+                var isImage = _currentSpineItem && _currentSpineItem.media_type && _currentSpineItem.media_type.length && _currentSpineItem.media_type.indexOf("image/") == 0;
+                if (!isImage) {
+                    console.warn("Viewport: using img dimensions!");
+                }
             }
             else {
                 $img = $(contentDocument).find('image');

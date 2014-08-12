@@ -56,23 +56,44 @@ ReadiumSDK.Views.IFrameLoader = function (options) {
         iframe.setAttribute("data-baseUri", iframe.baseURI);
         iframe.setAttribute("data-src", src);
 
-        var loadedDocumentUri = new URI(src).absoluteTo(iframe.baseURI).toString();
+        var iframeBaseURI = new URI(iframe.baseURI).search('').hash('').toString();
 
-        fetchContentDocument(loadedDocumentUri, function (contentDocumentHtml) {
+        var loadedDocumentUri = new URI(src).absoluteTo(iframeBaseURI).toString();
 
-            if (!contentDocumentHtml) {
-                //failed to load content document
-                callback.call(context, false, attachedData);
-            } else {
-                self._loadIframeWithDocument(iframe, attachedData, contentDocumentHtml, function () {
-                    callback.call(context, true, attachedData);
-                });
-            }
-        });
+        iframe.setAttribute("data-uri", loadedDocumentUri);
+
+        var contentType = 'text/html';
+        if (attachedData.spineItem.media_type && attachedData.spineItem.media_type.length) {
+            contentType = attachedData.spineItem.media_type;
+        }
+        var isImage = contentType.indexOf("image/") == 0;
+
+        if (isImage) {
+            iframe.onload = function () {
+                self.updateIframeEvents(iframe);
+                callback.call(context, true, attachedData);
+            };
+
+            iframe.setAttribute("src", loadedDocumentUri);
+        }
+        else {
+            fetchContentDocument(loadedDocumentUri, function (contentDocumentHtml) {
+                if (!contentDocumentHtml) {
+                    //failed to load content document
+                    callback.call(context, false, attachedData);
+                } else {
+                    self._loadIframeWithDocument(iframe, attachedData, contentDocumentHtml, function () {
+                        callback.call(context, true, attachedData);
+                    });
+                }
+            });
+        }
     };
 
     this._loadIframeWithDocument = function (iframe, attachedData, contentDocumentData, callback) {
 
+        var documentDataUri = undefined;
+        
         var isIE = (window.navigator.userAgent.indexOf("Trident") > 0);
         if (!isIE) {
             var contentType = 'text/html';
@@ -80,7 +101,7 @@ ReadiumSDK.Views.IFrameLoader = function (options) {
                 contentType = attachedData.spineItem.media_type;
             }
 
-            var documentDataUri = window.URL.createObjectURL(
+            documentDataUri = window.URL.createObjectURL(
                 new Blob([contentDocumentData], {'type': contentType})
             );
         } else {
@@ -146,10 +167,14 @@ ReadiumSDK.Views.IFrameLoader = function (options) {
                 return;
             }
 
-            var sourceParts = src.split("/");
-            sourceParts.pop(); //remove source file name
+            var root = new URI(src).search('').hash('').toString();
 
-            var base = "<base href=\"" + sourceParts.join("/") + "/" + "\"/>";
+            // The filename *must* be preserved so that #xx fragment identifiers can be resolved against the correct HTML!
+            // var sourceParts = src.split("/");
+            // sourceParts.pop(); //remove source file name
+            // root = sourceParts.join("/") + '/';
+
+            var base = "<base href=\"" + root + "\" />";
 
             var scripts = "<script type=\"text/javascript\">(" + injectedScript.toString() + ")()<\/script>";
 
@@ -158,6 +183,12 @@ ReadiumSDK.Views.IFrameLoader = function (options) {
             }
 
             var mangledContent = contentDocumentHtml.replace(/(<head.*?>)/, "$1" + base + scripts);
+            
+            // TODO: xml:base unfortunately does not solve the SVG clipPath/gradient problems (#xxx fragment identifier not resolving to full URI)
+            // (works for XLINK though!)
+            mangledContent = mangledContent.replace(/<body/, "<body xml:base=\"" + root + "\"");
+            mangledContent = mangledContent.replace(/<svg/g, "<svg xml:base=\"" + root + "\"");
+            
             callback(mangledContent);
         });
     }
