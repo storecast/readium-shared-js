@@ -854,7 +854,7 @@ ReadiumSDK.Views.ReaderView = function(options) {
 
         // interrupt at this point
         if (_viewerSettings.isSyntheticSpread == false || spineItem.isLeftPage() || spineItem.isCenterPage()) {
-            if (_viewerSettings.automaticPageTurnEnabled == false) {
+            if (_viewerSettings.mediaOverlaysAutomaticPageTurn == false) {
                 self.trigger(ReadiumSDK.Events.PAGINATION_WILL_CHANGE);
                 return;
             }

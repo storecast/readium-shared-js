@@ -26,7 +26,7 @@
 //  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED 
 //  OF THE POSSIBILITY OF SUCH DAMAGE.
 
-ReadiumSDK.Views.IFrameLoader = function (options) {
+ReadiumSDK.Views.IFrameLoader = function () {
 
     var self = this;
     var eventListeners = {};
@@ -56,61 +56,18 @@ ReadiumSDK.Views.IFrameLoader = function (options) {
         iframe.setAttribute("data-baseUri", iframe.baseURI);
         iframe.setAttribute("data-src", src);
 
-        var iframeBaseURI = new URI(iframe.baseURI).search('').hash('').toString();
+        var loadedDocumentUri = new URI(src).absoluteTo(iframe.baseURI).toString();
 
-        var loadedDocumentUri = new URI(src).absoluteTo(iframeBaseURI).toString();
-
-        iframe.setAttribute("data-uri", loadedDocumentUri);
-
-        var contentType = 'text/html';
-        if (attachedData.spineItem.media_type && attachedData.spineItem.media_type.length) {
-            contentType = attachedData.spineItem.media_type;
-        }
-        var isImage = contentType.indexOf("image/") == 0;
-
-        if (isImage) {
-            iframe.onload = function () {
-                self.updateIframeEvents(iframe);
-                callback.call(context, true, attachedData);
-            };
-
-            iframe.setAttribute("src", loadedDocumentUri);
-        }
-        else {
-            fetchContentDocument(loadedDocumentUri, function (contentDocumentHtml) {
-                if (!contentDocumentHtml) {
-                    //failed to load content document
-                    callback.call(context, false, attachedData);
-                } else {
-                    self._loadIframeWithDocument(iframe, attachedData, contentDocumentHtml, function () {
-                        callback.call(context, true, attachedData);
-                    });
-                }
+        self._loadIframeWithDocument(iframe, attachedData, loadedDocumentUri, function () {
+            var doc = iframe.contentDocument || iframe.contentWindow.document;
+            $('svg', doc).load(function(){
+                console.log('loaded');
             });
-        }
+            callback.call(context, true, attachedData);
+        });
     };
 
-    this._loadIframeWithDocument = function (iframe, attachedData, contentDocumentData, callback) {
-
-        var documentDataUri = undefined;
-        
-        var isIE = (window.navigator.userAgent.indexOf("Trident") > 0);
-        if (!isIE) {
-            var contentType = 'text/html';
-            if (attachedData.spineItem.media_type && attachedData.spineItem.media_type.length) {
-                contentType = attachedData.spineItem.media_type;
-            }
-
-            documentDataUri = window.URL.createObjectURL(
-                new Blob([contentDocumentData], {'type': contentType})
-            );
-        } else {
-            // Internet Explorer doesn't handle loading documents from Blobs correctly.
-            // TODO: Currently using the document.write() approach only for IE, as it breaks CSS selectors
-            // with namespaces for some reason (e.g. the childrens-media-query sample EPUB)
-            iframe.contentWindow.document.open();
-            iframe.contentWindow.document.write(contentDocumentData);
-        }
+    this._loadIframeWithDocument = function (iframe, attachedData, contentUri, callback) {
 
         iframe.onload = function () {
 
@@ -122,82 +79,16 @@ ReadiumSDK.Views.IFrameLoader = function (options) {
                 var mathJaxCallback = _.once(callback);
                 mathJax.Hub.Queue(mathJaxCallback);
                 // Or at an 8 second timeout, which ever comes first
-                window.setTimeout(mathJaxCallback, 8000);
+                //window.setTimeout(mathJaxCallback, 8000);
             } else {
                 callback();
             }
-
-            if (!isIE) {
-                window.URL.revokeObjectURL(documentDataUri);
-            }
         };
 
-        if (!isIE) {
-            iframe.setAttribute("src", documentDataUri);
-        } else {
-            iframe.contentWindow.document.close();
-        }
+        iframe.setAttribute("src", contentUri);
+        
     };
 
-    function fetchHtmlAsText(path, callback) {
-
-        $.ajax({
-            url: path,
-            dataType: 'html',
-            async: true,
-            success: function (result) {
-
-                callback(result);
-            },
-            error: function (xhr, status, errorThrown) {
-                console.error('Error when AJAX fetching ' + path);
-                console.error(status);
-                console.error(errorThrown);
-                callback();
-            }
-        });
-    }
-
-    function fetchContentDocument(src, callback) {
-
-        fetchHtmlAsText(src, function (contentDocumentHtml) {
-
-            if (!contentDocumentHtml) {
-                callback();
-                return;
-            }
-
-            var root = new URI(src).search('').hash('').toString();
-
-            // The filename *must* be preserved so that #xx fragment identifiers can be resolved against the correct HTML!
-            // var sourceParts = src.split("/");
-            // sourceParts.pop(); //remove source file name
-            // root = sourceParts.join("/") + '/';
-
-            var base = "<base href=\"" + root + "\" />";
-
-            var scripts = "<script type=\"text/javascript\">(" + injectedScript.toString() + ")()<\/script>";
-
-            if (options && options.mathJaxUrl && contentDocumentHtml.indexOf("<math") >= 0) {
-                scripts += "<script type=\"text/javascript\" src=\"" + options.mathJaxUrl + "\"><\/script>";
-            }
-
-            var mangledContent = contentDocumentHtml.replace(/(<head.*?>)/, "$1" + base + scripts);
-            
-            // TODO: xml:base unfortunately does not solve the SVG clipPath/gradient problems (#xxx fragment identifier not resolving to full URI)
-            // (works for XLINK though!)
-            mangledContent = mangledContent.replace(/<body/, "<body xml:base=\"" + root + "\"");
-            mangledContent = mangledContent.replace(/<svg/g, "<svg xml:base=\"" + root + "\"");
-            
-            callback(mangledContent);
-        });
-    }
-
-    function injectedScript() {
-
-        navigator.epubReadingSystem = window.parent.navigator.epubReadingSystem;
-        window.parent = window.self;
-        window.top = window.self;
-    }
+    
 
 };
