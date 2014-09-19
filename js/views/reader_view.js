@@ -52,8 +52,12 @@ ReadiumSDK.Views.ReaderView = function(options) {
     var _annotationsManager = new ReadiumSDK.Views.AnnotationsManager(self, options);
     
     //We will call onViewportResize after user stopped resizing window
-    var lazyResize = _.debounce(function() { self.handleViewportResize() }, 200, false);
-    $(window).on("resize.ReadiumSDK.readerView", _.bind(lazyResize, self));
+    var lazyResize = ReadiumSDK.Helpers.extendedThrottle(
+        handleViewportResizeStart,
+        handleViewportResizeTick,
+        handleViewportResizeEnd, 250, 1000, self);
+
+    $(window).on("resize.ReadiumSDK.readerView", lazyResize);
 
     if (options.el instanceof $) {
         _$el = options.el;
@@ -1024,104 +1028,61 @@ ReadiumSDK.Views.ReaderView = function(options) {
         if(_currentView) {
             _currentView.insureElementVisibility(spineItemId, element, initiator);
         }
-    }
-    
-    this.handleViewportResize = function()
-    {
-        if (_currentView)
-        {
-            var bookMark = _currentView.bookmarkCurrentPage(); // not self! (JSON string)
-            //
-            // console.debug("Saving reading position (handleViewportResize)...");
-            // console.error(bookMark.idref);
-            // console.error(bookMark.contentCFI);
+    };
 
-            // NOT NEEDED
-            // if (_lastResizeBookmark)
-            // {
-            //     bookMark = _lastResizeBookmark;
-            //     _lastResizeBookmark = undefined;
-            //
-            //     console.debug("INITIAL BOOKMARK");
-            //     console.error(bookMark.idref);
-            //     console.error(bookMark.contentCFI);
-            // }
-            //
-            if (_currentView.isReflowable && _currentView.isReflowable() && bookMark && bookMark.idref)
-            {
-                var wasPlaying = self.isPlayingMediaOverlay();
-                if (wasPlaying)
-                {
+    var _resizeBookmark = null;
+    var _resizeMOWasPlaying = false;
+
+    function handleViewportResizeStart() {
+
+        _resizeBookmark = null;
+        _resizeMOWasPlaying = false;
+        
+        if (_currentView) {
+
+            if (_currentView.isReflowable && _currentView.isReflowable()) {
+                _resizeMOWasPlaying = self.isPlayingMediaOverlay();
+                if (_resizeMOWasPlaying) {
                     self.pauseMediaOverlay();
                 }
-
-                if (false)
-                {            
-                    _currentView.onViewportResize();
-
-                    if (wasPlaying)
-                    {
-                        setTimeout(function()
-                        {
-                            self.playMediaOverlay();
-                        }, 150);
-                    }
-                }
-                else
-                {
-                    //_currentView.onViewportResize();
-                    
-                    // setTimeout(function()
-                    // {
-                        var spineItem = _spine.getItemById(bookMark.idref);
-//console.debug("bookMark.idref: " + bookMark.idref);
-                        initViewForItem(spineItem, function(isViewChanged)
-                        {
-//console.debug("initViewForItem: " + isViewChanged);
-                            // if(!isViewChanged)
-                            // {
-                            //     _currentView.setViewSettings(_viewerSettings);
-                            // }
-                    
-//console.debug("Restoring reading position: " + bookMark.contentCFI);
-                            self.openSpineItemElementCfi(bookMark.idref, bookMark.contentCFI, self);
-
-                            if (wasPlaying)
-                            {
-                                self.playMediaOverlay();
-                                // setTimeout(function()
-                                // {
-                                // }, 60);
-                            }
-
-                            return;
-                        });
-//                    }, 1000);
-                }
             }
-            else
-            {
-console.debug("RESIZE NO RESTORE BOOKMARK");
-                var wasPlaying = false;
-                if (_currentView.isReflowable && _currentView.isReflowable())
-                {
-                    wasPlaying = self.isPlayingMediaOverlay();
-                    if (wasPlaying)
-                    {
-                        self.pauseMediaOverlay();
-                    }
-                }
             
-                _currentView.onViewportResize();
+            _resizeBookmark = _currentView.bookmarkCurrentPage(); // not self! (JSON string)
+        }
+    }
 
-                if (wasPlaying)
-                {
-                    setTimeout(function()
-                    {
-                        self.playMediaOverlay();
-                    }, 150);
-                }
-            }
+    function handleViewportResizeTick() {
+        if (_currentView) {
+            self.handleViewportResize(_resizeBookmark);
+        }
+    }
+
+    function handleViewportResizeEnd() {
+        //same as doing one final tick for now
+        handleViewportResizeTick();
+        
+        if (_resizeMOWasPlaying) self.playMediaOverlay();
+    }
+
+    this.handleViewportResize = function(bookmarkToRestore)
+    {
+        if (!_currentView) return;
+
+        var bookMark = bookmarkToRestore || _currentView.bookmarkCurrentPage(); // not self! (JSON string)
+
+        if (_currentView.isReflowable && _currentView.isReflowable() && bookMark && bookMark.idref)
+        {
+            var spineItem = _spine.getItemById(bookMark.idref);
+
+            initViewForItem(spineItem, function(isViewChanged)
+            {
+                self.openSpineItemElementCfi(bookMark.idref, bookMark.contentCFI, self);
+                return;
+            });
+        }
+        else
+        {
+            _currentView.onViewportResize();
         }
     }
 
@@ -1243,7 +1204,7 @@ console.debug("RESIZE NO RESTORE BOOKMARK");
                     $iframe = data["$iframe"];
                     if (!$iframe) continue;
         
-                    var $audios = $("body > audio", $iframe[0].contentDocument);
+                    var $audios = $("audio", $iframe[0].contentDocument);
 
                     $.each($audios, function() {
 
@@ -1251,8 +1212,8 @@ console.debug("RESIZE NO RESTORE BOOKMARK");
 
                         if (!attr) return true; // continue
 
-                        if (attr !== "ibooks:soundtrack") return true; // continue
-            
+                        if (attr.indexOf("ibooks:soundtrack") < 0 && attr.indexOf("media:soundtrack") < 0 && attr.indexOf("media:background") < 0) return true; // continue
+
                         if (doPlay && this.play)
                         {
                             this.play();
@@ -1361,15 +1322,15 @@ console.debug("RESIZE NO RESTORE BOOKMARK");
                         var $iframe = data["$iframe"];
                         var href = data.href;
 
-                        var $audios = $("body > audio", $iframe[0].contentDocument);
+                        var $audios = $("audio", $iframe[0].contentDocument);
                         $.each($audios, function() {
 
                             var attr = this.getAttribute("epub:type") || this.getAttribute("type");
 
                             if (!attr) return true; // continue
 
-                            if (attr !== "ibooks:soundtrack") return true; // continue
-        
+                            if (attr.indexOf("ibooks:soundtrack") < 0 && attr.indexOf("media:soundtrack") < 0 && attr.indexOf("media:background") < 0) return true; // continue
+
                             this.setAttribute("loop", "loop");
                             this.removeAttribute("autoplay");
 
